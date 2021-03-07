@@ -16,7 +16,7 @@
 
 #define PATHSIZE 1024
 #define LINEBUFSIZE 1024
-#define MP3_BITRATE 64*1024 //correct bps:128*1024
+#define MP3_BITRATE 128*1024 //correct bps:128*1024
 struct channel_context_st
 {
     chnid_t chnid;
@@ -40,12 +40,12 @@ static struct channel_context_st *path2entry(const char* path)
     struct channel_context_st *me;
     static chnid_t curr_id = MINCHNID;
     strcat(pathstr, path);
-    strcat(pathstr, "/desc.txt");
+    strcat(pathstr, "/.desc");
     fp = fopen(pathstr, "r");
     syslog(LOG_INFO, "channel dir:%s\n", pathstr);
     if(fp == NULL)
     {
-        syslog(LOG_INFO, "%s is not a channel dir(can't find desc.txt)", path);
+        syslog(LOG_INFO, "%s is not a channel dir(can't find .desc)", path);
         return NULL;
     }
     if(fgets(linebuf, LINEBUFSIZE, fp) == NULL)

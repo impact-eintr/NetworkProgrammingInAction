@@ -1,3 +1,4 @@
+#include <bits/types/struct_timeval.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -7,6 +8,7 @@
 #include <pthread.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/types.h>
 #include "mytbf.h"
 struct mytbf_st
@@ -26,6 +28,11 @@ static pthread_t tid;
 
 static void *thr_alrm(void* p)
 {
+
+    struct timespec ts;
+    ts.tv_nsec = 0;
+    ts.tv_sec = 1;
+
     while(1)
     {
         pthread_mutex_lock(&mut_job);
@@ -42,7 +49,7 @@ static void *thr_alrm(void* p)
             }
         }
         pthread_mutex_unlock(&mut_job);
-        sleep(1);
+        nanosleep(&ts,NULL);
     }
 }
 static  void module_unload()

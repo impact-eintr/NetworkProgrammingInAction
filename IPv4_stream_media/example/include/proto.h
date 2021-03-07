@@ -2,7 +2,7 @@
 #define PROTO_H_
 
 #define DEFAULT_MGROUP "224.2.2.2"  //default multicast group
-#define DEFAULT_RCVPORT "1989"  //port
+#define DEFAULT_RCVPORT "2333"  //port
 #define CHANNR 200//channel number
 
 #define LISTCHNID 0//list channel

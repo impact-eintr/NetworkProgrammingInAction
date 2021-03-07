@@ -24,7 +24,6 @@
 
 struct client_conf_st client_conf = {\
         .rcvport = DEFAULT_RCVPORT,\
-        .mgroup = DEFAULT_MGROUP,\
         .player_cmd = DEFAULT_PLAYERCMD,\
         .mgroup = DEFAULT_MGROUP};
 
@@ -125,7 +124,7 @@ int main(int argc, char * argv[])
     //local address(self)
     inet_pton(AF_INET, "0.0.0.0", &mreq.imr_address);
     //local net card
-    mreq.imr_ifindex = if_nametoindex("enp0s3");
+    mreq.imr_ifindex = if_nametoindex("wlp7s0");
     if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0)
     {
         perror("setsockopt()");

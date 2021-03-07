@@ -1,14 +1,12 @@
-all:server
+all:client
 CFLAGS += -lstdc++ -pthread -Wall -g
 
-server:main.c server.o
+client:client.o
 	gcc $^ -o $@
-	mv $@ ./bin
+	mv $^ $@ ./bin
 
-server.o:server.c
+client.o:client.c
 	gcc $^ -c -o $@
-	mv $@ ./bin
-
 
 clean:
 	rm -i ./bin/*

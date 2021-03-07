@@ -15,14 +15,6 @@
 #include "../include/proto.h"
 #include "client.h"
 
-/*
- *  -M -- mgroup 指定多播组
- *  -P --port    指定接收端口
- *  -p --player  指定播放器
- *  -H --help    help
- *
- * */
-
 struct client_conf_st client_conf = {
     .rcvport = DEFAULT_RECVPORT,
     .mgroup  = DEFAULT_MGROUP,
@@ -38,14 +30,20 @@ static void help(){
 
 static int writen(int fd,const char *buf,size_t len){
     int ret;
+    int pos = 0;
     while(len > 0){
-        ret = write(fd,buf,len);
+        ret = write(fd,buf+pos,len);
         if (ret < 0){
             if (errno == EINTR)
               continue;
+            perror("write");
+            return -1;
         }
-
+        len -= ret;
+        pos += ret;
     }
+
+    return pos;
 }
 
 int main(int argc,char **argv){
@@ -56,17 +54,17 @@ int main(int argc,char **argv){
     //3 配置文件
     //4 默认值
     struct option argarr[] = {
-        {"port",1,NULL,'p'},
+        {"port",1,NULL,'P'},
         {"mgroup",1,NULL,'M'},
         {"player",1,NULL,'p'},
         {"help",0,NULL,'H'},
         {NULL,0,NULL,0}
     };
+
     int index = 0;
     char op;
-    ;
     while(1){
-        op = getopt_long(argc,argv,"P:M:p:H:",argarr,&index);
+        op = getopt_long(argc,argv,"P:M:p:H",argarr,&index);
         if (op < 0){
             break;
         }
@@ -184,19 +182,23 @@ int main(int argc,char **argv){
 
         //打印节目单选择频道
         struct msg_listentry_st *pos;
+        printf("pkglen : %d\n",pkglen);
 
         for (pos = msg_list->entry;\
                     (char *)pos < (((char *)msg_list)+pkglen);\
                     pos = (void *)(((char *)pos)+ntohs(pos->len))){
-            printf("频道 %d : %s \n",pos->channelid,pos->desc);
+            printf("频道 %d : %s %ld\n",pos->channelid,pos->desc,strlen(pos->desc));
         }
 
-        int chosenid;
-        while(1){
-            if(scanf("%d",&chosenid) != 1){
+        free(msg_list);
+
+        int chosenid = 0,ret = 0;
+        while (ret < 1)
+        {
+            ret = scanf("%d", &chosenid);
+            if(ret != 1)
                 exit(1);
-            }
-        }
+        } 
 
         //收频道包 发送给子进程
         struct msg_channel_st *msg_channel;
@@ -225,12 +227,14 @@ int main(int argc,char **argv){
             if (msg_channel->channelid == chosenid){
                 close(pipefd[0]);
                 fprintf(stdout,"accepted msg:%d recvievced.\n",msg_channel->channelid);
-                write(pipefd[1],msg_channel->data,rpkglen-sizeof(uint8_t));
+                if(write(pipefd[1],msg_channel->data,rpkglen-sizeof(uint8_t)) < 0){
+                    exit(1);
+                }
             }
 
             break;
         }
-
+        free(msg_channel);
         exit(0);
     }
 }
